@@ -1,9 +1,9 @@
 apiVersion: projectcontour.io/v1
 kind: HTTPProxy
 metadata:
-  name: "{{ include "hool-jenkins.fullname" . }}-corp"
+  name: "{{ include "jk8-jenkins.fullname" . }}-corp"
   labels:
-    {{- include "hool-jenkins.labels" . | nindent 4 }}
+    {{- include "jk8-jenkins.labels" . | nindent 4 }}
   annotations:
     kubernetes.io/ingress.class: contour-corp
 spec:
@@ -15,5 +15,5 @@ spec:
   - conditions:
     - prefix: "/"
     services:
-    - name: {{ include "hool-jenkins.fullname" . }}
+    - name: {{ include "jk8-jenkins.fullname" . }}
       port: 8080

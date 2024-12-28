@@ -1,7 +1,7 @@
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
-  name: {{ include "hool-jenkins.fullname" . }}-egress
+  name: {{ include "jk8-jenkins.fullname" . }}-egress
 spec:
   egress:
     - toEndpoints:
@@ -14,4 +14,4 @@ spec:
           name: my-service
   endpointSelector:
     matchLabels:
-      {{- include "hool-jenkins.selectorLabels" . | nindent 6 }}
+      {{- include "jk8-jenkins.selectorLabels" . | nindent 6 }}

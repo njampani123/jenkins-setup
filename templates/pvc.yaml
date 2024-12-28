@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "hool-jenkins.fullname" . }}
+  name: {{ include "jk8-jenkins.fullname" . }}
   labels:
-    {{- include "hool-jenkins.labels" . | nindent 4 }}
+    {{- include "jk8-jenkins.labels" . | nindent 4 }}
 spec:
   storageClassName: gp3
   accessModes:
