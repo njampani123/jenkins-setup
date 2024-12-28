@@ -1,0 +1,112 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "hool-jenkins.fullname" . }}
+  labels:
+    {{- include "hool-jenkins.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "hool-jenkins.fullname" . }}
+  replicas: 1
+  updateStrategy:
+    type: "RollingUpdate"
+  podManagementPolicy: "Parallel"
+  selector:
+    matchLabels:
+      {{- include "hool-jenkins.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "hool-jenkins.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: jenkins-admin
+      imagePullSecrets:
+        - name: docker-config-secret
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: jenkins
+          securityContext:
+          image: "{{ .Values.dockerRegistry }}/jenkins/jenkins:v2"
+          imagePullPolicy: Always
+          command: [ "/bin/sh" ]
+          args:
+            - "-c"
+            - |
+              jenkins-plugin-cli -f /plugins/plugins.txt && \ 
+              exec /usr/bin/tini -- /usr/local/bin/jenkins.sh
+          ports:
+            - name: httpport
+              containerPort: 8080
+              hostPort: 8080
+            - name: jnlpport
+              containerPort: 50000
+              hostPort: 50000
+          livenessProbe:
+            httpGet:
+              path: "/login"
+              port: 8080
+            initialDelaySeconds: 90
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: "/login"
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: JENKINS_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "hool-jenkins.fullname" . }}-jenkins-admin-credentials
+                  key: JENKINS_USER
+            - name: JENKINS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "hool-jenkins.fullname" . }}-jenkins-admin-credentials
+                  key: JENKINS_PASSWORD
+            - name: CASC_JENKINS_CONFIG
+              value: /casc
+            - name: JAVA_OPTS 
+              value: "-Djenkins.install.runSetupWizard=false"
+          volumeMounts:
+            - name: jenkins-data
+              mountPath: /var/jenkins_home
+            - name: credentials-casc
+              mountPath: /casc/credentials
+            - name: configuration-casc
+              mountPath: /casc/configuration
+            - name: plugins
+              mountPath: /plugins
+            - name: jenkins-init-script
+              mountPath: /var/jenkins_home/init.groovy.d
+            - name: hoolihan-jenkins-key-volume
+              mountPath: /var/jenkins_home/hoolihan-jenkins-key.pem
+              subPath: hoolihan-jenkins-key.pem
+      volumes:
+        - name: jenkins-data
+          persistentVolumeClaim:
+              claimName: {{ include "hool-jenkins.fullname" . }}
+        - name: credentials-casc
+          secret:
+            secretName: "{{ include "hool-jenkins.fullname" . }}-credentials"
+        - name: configuration-casc
+          configMap:
+            name: "{{ include "hool-jenkins.fullname" . }}-configuration"
+        - name: plugins
+          configMap:
+            name: "{{ include "hool-jenkins.fullname" . }}-plugins"
+        - name: jenkins-init-script
+          configMap:
+            name: "{{ include "hool-jenkins.fullname" . }}-jenkins-init-script"
+        - name: hoolihan-jenkins-key-volume
+          secret:
+            secretName: hoolihan-jenkins-key
+        - name: jenkins-credentials
+          configMap:
+            name: "jenkins-credentials"

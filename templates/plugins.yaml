@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ include "hool-jenkins.fullname" . }}-plugins"
+  labels:
+    {{- include "hool-jenkins.labels" . | nindent 4 }}
+data:
+  plugins.txt: |
+    active-directory:latest
+    ant:latest
+    build-timeout:latest
+    conditional-buildstep:latest
+    configuration-as-code:latest
+    dark-theme:latest 
+    ec2:latest
+    email-ext:latest
+    github-branch-source:latest
+    gradle:latest
+    ldap:latest
+    matrix-auth:latest
+    pam-auth:latest
+    workflow-aggregator:latest
+    pipeline-graph-view:latest
+    pipeline-github-lib:latest
+    ssh-slaves:latest
+    throttle-concurrents:latest
+    timestamper:latest
+    ws-cleanup:latest
+    job-dsl:latest

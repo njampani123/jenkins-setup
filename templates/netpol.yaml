@@ -1,0 +1,17 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: {{ include "hool-jenkins.fullname" . }}-egress
+spec:
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            app: external-service
+    - toEntities:
+        - world
+    - toServices:
+        - namespace: default
+          name: my-service
+  endpointSelector:
+    matchLabels:
+      {{- include "hool-jenkins.selectorLabels" . | nindent 6 }}

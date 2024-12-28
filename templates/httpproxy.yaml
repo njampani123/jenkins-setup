@@ -1,0 +1,19 @@
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: "{{ include "hool-jenkins.fullname" . }}-corp"
+  labels:
+    {{- include "hool-jenkins.labels" . | nindent 4 }}
+  annotations:
+    kubernetes.io/ingress.class: contour-corp
+spec:
+  virtualhost:
+    fqdn: {{ .Values.ingress.fqdn }}
+    tls:
+      secretName: heptio-contour/cluster-ssl-corp
+  routes:
+  - conditions:
+    - prefix: "/"
+    services:
+    - name: {{ include "hool-jenkins.fullname" . }}
+      port: 8080

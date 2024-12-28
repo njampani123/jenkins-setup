@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "hool-jenkins.fullname" . }}-jenkins-init-script
+data:
+  01-create-admin-user.groovy: |
+    import jenkins.model.*
+    import hudson.security.*
+
+    def instance = Jenkins.getInstance()
+    def hudsonRealm = new HudsonPrivateSecurityRealm(false)
+    def env = System.getenv()
+    String user = env['JENKINS_USER'] ?: 'admin'
+    String password = env['JENKINS_PASSWORD'] ?: 'admin123'
+    hudsonRealm.createAccount(user, password)
+    instance.setSecurityRealm(hudsonRealm)
+    instance.save()

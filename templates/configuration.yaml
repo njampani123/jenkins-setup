@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ include "hool-jenkins.fullname" . }}-configuration"
+  labels:
+    {{- include "hool-jenkins.labels" . | nindent 4 }}
+data:
+  security.yaml: |
+    jenkins:
+      securityRealm:
+        local:
+          allowsSignup: false
+          users:
+            - id: "admin"
+              password: "admin123"  # Replace with a secure password
+      authorizationStrategy:
+        globalMatrix:
+          entries:
+          - user:
+              name: "admin"
+              permissions:
+              - "Overall/Administer"
+              - "Job/Build"
+              - "Job/Cancel"
+              - "Job/Configure"
+              - "Job/Create"
+              - "Job/Delete"
+              - "Job/Discover"
+              - "Job/Move"
+              - "Job/Read"
+              - "Job/Workspace"
+              - "Run/Delete"
+              - "Run/Replay"
+              - "Run/Update"
+              - "View/Configure"
+              - "View/Create"
+              - "View/Delete"
+              - "View/Read"
+              - "SCM/Tag"
+              - "Credentials/Create"
+              - "Credentials/Delete"
+              - "Credentials/ManageDomains"
+              - "Credentials/Update"
+              - "Credentials/View"
+              - "Overall/Read"
+              - "Overall/Manage"
+              - "Overall/SystemRead"
+              - "Overall/RunScripts"
+              - "Overall/UploadPlugins"
+              - "Overall/ConfigureUpdateCenter"
+  jobs.yaml: |
+    jobs:
+      - script: >
+          job('example') {
+            steps {
+              shell('echo Hello World!')
+            }
+          }
